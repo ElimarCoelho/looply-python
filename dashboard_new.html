@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Looply AI | Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #080a0f;
+            --surface: #0e1117;
+            --surface2: #151922;
+            --surface3: #1c2230;
+            --accent: #00e5ff;
+            --accent2: #7c3aed;
+            --accent3: #f59e0b;
+            --text: #f0f4ff;
+            --text2: rgba(240, 244, 255, 0.55);
+            --text3: rgba(240, 244, 255, 0.28);
+            --border: rgba(255, 255, 255, 0.07);
+            --border2: rgba(255, 255, 255, 0.12);
+            --danger: #ff4d6d;
+            --success: #00d68f;
+            --sidebar-w: 240px;
+            --sidebar-collapsed: 64px;
+            --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ───── SIDEBAR ───── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: width var(--transition);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 100;
+            overflow: visible;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            padding: 24px 16px;
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            min-height: 80px;
+            overflow: hidden;
+        }
+
+        .logo-img {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+            transition: all var(--transition);
+        }
+
+        .logo-text {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity var(--transition);
+        }
+
+        .sidebar.collapsed .logo-text {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar.collapsed .logo-img {
+            transform: scale(0.85);
+            margin-left: -5px;
+        }
+
+        .nav {
+            padding: 16px 8px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .nav::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .nav::-webkit-scrollbar-thumb {
+            background: var(--surface3);
+            border-radius: 3px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            color: var(--text2);
+            transition: background 0.2s, color 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-decoration: none;
+            position: relative;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .nav-item:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: rgba(0, 229, 255, 0.08);
+            color: var(--accent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 2.5px;
+            border-radius: 2px;
+            background: var(--accent);
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .nav-label {
+            font-size: 13.5px;
+            font-weight: 500;
+            opacity: 1;
+            transition: opacity var(--transition);
+        }
+
+        .sidebar.collapsed .nav-label {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar-footer {
+            padding: 12px 8px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toggle Button */
+        .toggle-btn {
+            position: absolute;
+            top: 50%;
+            right: -12px;
+            width: 24px;
+            height: 24px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            transition: all var(--transition);
+            color: var(--text2);
+            transform: translateY(-50%);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-btn:hover {
+            background: var(--surface3);
+            color: var(--text);
+            border-color: var(--border2);
+        }
+
+        .toggle-btn i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            transition: transform var(--transition);
+            transform: rotate(0deg);
+        }
+
+        .sidebar.collapsed .toggle-btn i {
+            transform: rotate(180deg);
+        }
+
+        .sidebar.collapsed .toggle-btn {
+            right: -12px;
+        }
+
+        /* ───── MAIN ───── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            height: 72px;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border);
+            gap: 16px;
+        }
+
+        .topbar-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .topbar-sub {
+            font-size: 12px;
+            color: var(--text3);
+            margin-top: 2px;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* Status Indicator */
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        #status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        #status-dot.active {
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: blink 2s infinite;
+        }
+
+        #status-dot.inactive {
+            background: var(--danger);
+            box-shadow: 0 0 10px var(--danger);
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* ───── CONTENT ───── */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .content::-webkit-scrollbar-thumb {
+            background: var(--surface3);
+            border-radius: 4px;
+        }
+
+        /* ───── CHAT VIEW ───── */
+        #chat-view {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chat-container {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background: var(--accent2);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-msg {
+            align-self: flex-start;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            background: var(--surface2);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #fff;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .send-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .send-btn:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        /* ───── CONFIG VIEW ───── */
+        #config-view {
+            display: none;
+        }
+
+        .config-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text);
+            font-size: 13.5px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent);
+        }
+
+        .form-textarea {
+            height: 120px;
+            resize: none;
+        }
+
+        .save-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            width: fit-content;
+            align-self: flex-end;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .save-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        /* BOT TOGGLE SWITCH */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: var(--surface3);
+            transition: .4s;
+            border: 1px solid var(--border2);
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #fff;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--success);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        /* ───── INTRO LANDING PAGE (REFINED PREMIUM) ───── */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            background: #05070a;
+            z-index: 10000;
+            overflow-y: auto;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #intro-overlay.hidden {
+            transform: scale(1.1);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .landing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .l-hero {
+            padding: 160px 0 100px;
+            text-align: center;
+            position: relative;
+        }
+
+        .l-hero-glow {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 229, 255, 0.15) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: -1;
+        }
+
+        .l-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 32px;
+            color: var(--accent);
+        }
+
+        .l-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(48px, 10vw, 92px);
+            font-weight: 800;
+            line-height: 0.95;
+            margin-bottom: 32px;
+            letter-spacing: -0.04em;
+        }
+
+        .l-desc {
+            font-size: 22px;
+            color: var(--text2);
+            max-width: 750px;
+            margin: 0 auto 56px;
+            line-height: 1.5;
+        }
+
+        .l-cta-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .l-btn-primary {
+            background: #fff;
+            color: #000;
+            padding: 20px 48px;
+            border-radius: 100px;
+            font-size: 17px;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+        }
+
+        .l-btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
+        }
+
+        .l-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            padding-bottom: 120px;
+        }
+
+        .l-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 48px;
+            border-radius: 32px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .l-card:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: var(--accent);
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 229, 255, 0.1);
+            z-index: 10;
+        }
+
+        .l-card-icon {
+            width: 48px;
+            height: 48px;
+            color: var(--accent);
+            margin-bottom: 32px;
+        }
+
+        .l-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .l-card p {
+            font-size: 16px;
+            color: var(--text2);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Animations */
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        [data-reveal].revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- INTRO LANDING -->
+    <div id="intro-overlay">
+        <div class="landing-container">
+            <header class="l-hero">
+                <div class="l-hero-glow"></div>
+                <div class="l-tag">Potenciado por Gemini 2.5</div>
+                <h1 class="l-title">Looply AI.<br>Un cerebro para tus obras.</h1>
+                <p class="l-desc">
+                    Captura pedidos automáticos en tus grupos de WhatsApp, elimina el error humano y escala tus ventas con agentes inteligentes con memoria propia.
+                </p>
+                <div class="l-cta-group">
+                    <button class="l-btn-primary" onclick="closeIntro()">CONFIGURAR MI PANEL</button>
+                </div>
+            </header>
+
+            <section class="l-features-grid">
+                <div class="l-card">
+                    <i data-lucide="scan-text" class="l-card-icon"></i>
+                    <h3>Scan de Grupos</h3>
+                    <p>Filtro inteligente que separa el ruido social del trabajo real. Identifica listas de materiales de oficiales al instante.</p>
+                </div>
+                <div class="l-card">
+                    <i data-lucide="layers" class="l-card-icon"></i>
+                    <h3>Orden por Obra</h3>
+                    <p>Cada grupo tiene su propia sección en el Dashboard. Materiales, cantidades y fechas organizadas por proyecto.</p>
+                </div>
+                <div class="l-card">
+                    <i data-lucide="brain-circuit" class="l-card-icon"></i>
+                    <h3>Base de Conocimiento</h3>
+                    <p>Tu agente usa los datos técnicos de tu empresa para responder con precisión y cerrar la venta sin que tú intervengas.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <button class="toggle-btn" onclick="toggleSidebar()" title="Colapsar/Expandir">
+            <i data-lucide="chevron-left"></i>
+        </button>
+
+        <div class="sidebar-header">
+            <img src="/imagen/logo.jpg" alt="Looply AI" class="logo-img">
+            <span class="logo-text">Looply AI</span>
+        </div>
+
+        <nav class="nav">
+            <button class="nav-item active" id="nav-chat" onclick="showView('chat')">
+                <i data-lucide="message-square" class="nav-icon"></i>
+                <span class="nav-label">Chat de Prueba</span>
+            </button>
+            <button class="nav-item" onclick="window.location.href='http://87.106.255.70:8447/'">
+                <i data-lucide="users" class="nav-icon"></i>
+                <span class="nav-label">Grupos</span>
+                <!-- <span class="nav-badge">12</span> -->
+            </button>
+            <button class="nav-item" id="nav-config" onclick="showView('config')">
+                <i data-lucide="settings" class="nav-icon"></i>
+                <span class="nav-label">Configuración</span>
+            </button>
+            <button class="nav-item" id="nav-profiles" onclick="showView('profiles')">
+                <i data-lucide="user-plus" class="nav-icon"></i>
+                <span class="nav-label">Perfiles de Clientes</span>
+            </button>
+            <button class="nav-item" id="nav-herramientas" onclick="showView('herramientas')">
+                <i data-lucide="wrench" class="nav-icon"></i>
+                <span class="nav-label">Herramientas</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="nav-item" style="cursor: default; background: transparent;">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;">
+                    <div style="display: flex; flex-direction: column;">
+                        <span class="nav-label" id="sidebar-bot-text" style="font-size: 11px;">Bot Activo</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="bot-toggle" onclick="toggleBot()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="nav-item" style="margin-top: 10px;">
+                <div
+                    style="width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;">
+                    E</div>
+                <span class="nav-label">Elimar</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <div class="topbar-left">
+                <div class="topbar-title" id="view-title">Chat de Prueba</div>
+                <div class="topbar-sub" id="view-subtitle">Interactúa directamente con tu motor IA</div>
+            </div>
+            <div class="topbar-actions">
+                <div class="status-badge">
+                    <div id="status-dot" class="active"></div>
+                    <span id="status-text">Motores Listos</span>
+                </div>
+                <button class="btn btn-ghost btn-icon"
+                    style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); display: flex; align-items: center; justify-content: center;"
+                    onclick="window.location.reload()">
+                    <i data-lucide="rotate-cw" style="width: 16px;"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- Chat View -->
+            <div id="chat-view">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat">
+                        <div class="message ai-msg">
+                            ¡Hola! Soy el motor de Looply. Escríbeme algo para probar mi inteligencia artificial.
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="userInput" class="chat-input" placeholder="Escribe tu mensaje aquí..."
+                            onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button class="send-btn" onclick="sendMessage()">ENVIAR</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Config View -->
+            <div id="config-view">
+                <div class="config-card">
+                    <div class="section-header" style="margin-bottom: 25px;">
+                        <h3 class="topbar-title" style="font-size: 16px;">Ajustes del Sistema</h3>
+                        <p class="topbar-sub">Configura tus credenciales y comportamiento de la IA</p>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field full">
+                            <label class="form-label">Webhook URL (WaSender)</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="cfg-webhook" class="form-input"
+                                    style="flex: 1; background: var(--surface2); color: var(--text2);"
+                                    value="http://87.106.255.70/webhook/whatsapp" readonly>
+                                <button onclick="copyWebhook()" class="btn btn-ghost"
+                                    style="padding: 0 15px; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); border-radius: 10px; cursor: pointer;">
+                                    <i data-lucide="copy" style="width: 16px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Supabase URL</label>
+                            <input type="text" id="cfg-supabase-url" class="form-input"
+                                placeholder="https://....supabase.co">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Supabase Key</label>
+                            <input type="password" id="cfg-supabase-key" class="form-input"
+                                placeholder="Service role key...">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">AI Provider</label>
+                            <select id="cfg-ai-provider" class="form-input">
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI ChatGPT</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">Gemini API Key</label>
+                            <input type="password" id="cfg-gemini" class="form-input" placeholder="AIzaSy...">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">OpenAI API Key</label>
+                            <input type="password" id="cfg-openai" class="form-input" placeholder="sk-...">
+                        </div>
+                        <div class="form-field">
+                            <label class="form-label">WaSender Token</label>
+                            <input type="password" id="cfg-wasender" class="form-input"
+                                placeholder="Tu token de acceso...">
+                        </div>
+                        <div class="form-field full">
+                            <label class="form-label">Sistema / Prompt</label>
+                            <textarea id="cfg-prompt" class="form-input form-textarea"
+                                placeholder="Instrucciones para la IA..."></textarea>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                        <button class="save-btn" onclick="saveUserConfig()">GUARDAR CAMBIOS</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profiles View -->
+            <div id="profiles-view" style="display: none;">
+                <!-- NUEVO CONTENEDOR DE FLUJO DE TRABAJO -->
+                <div class="config-card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), transparent);">
+                    <div style="display: flex; align-items: flex-start; gap: 20px;">
+                        <div style="background: var(--accent); color: #000; padding: 12px; border-radius: 12px;">
+                            <i data-lucide="git-merge" style="width: 24px; height: 24px;"></i>
+                        </div>
+                        <div>
+                            <h3 style="font-family: 'Syne', sans-serif; font-size: 18px; margin-bottom: 8px;">Ciclo de Venta Inteligente</h3>
+                            <p style="color: var(--text2); font-size: 14px; line-height: 1.6; max-width: 800px;">
+                                Configura el cerebro de tu agente. Cuando guardas un perfil, Looply AI asocia esa información al teléfono. 
+                                Al recibir la respuesta del cliente, el bot activará automáticamente esta base de conocimiento para cerrar la venta por ti.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 30px;">
+                        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
+                            <span style="font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase;">Paso 1</span>
+                            <h4 style="font-size: 14px; margin: 8px 0;">Crear Perfil</h4>
+                            <p style="font-size: 12px; color: var(--text3);">Define precios, servicios y tono para este cliente específico abajo.</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
+                            <span style="font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase;">Paso 2</span>
+                            <h4 style="font-size: 14px; margin: 8px 0;">Primer Contacto</h4>
+                            <p style="font-size: 12px; color: var(--text3);">Envía tu propuesta inicial por WhatsApp (el bot no intervendrá aún).</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 16px; border: 1px dashed rgba(255,255,255,0.1);">
+                            <span style="font-size: 10px; color: var(--accent); font-weight: 800; text-transform: uppercase;">Paso 3</span>
+                            <h4 style="font-size: 14px; margin: 8px 0;">IA Toma el Control</h4>
+                            <p style="font-size: 12px; color: var(--text3);">Cuando el cliente responda, el bot usará el perfil para vender.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-card">
+                    <div class="section-header" style="margin-bottom: 25px;">
+                        <h3 class="topbar-title" style="font-size: 16px;">Configuración del Perfil</h3>
+                        <p class="topbar-sub">Personaliza la información que el agente usará para este cliente específico</p>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="form-label">Teléfono del Cliente (con prefijo, sin +)</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="prof-phone" class="form-input" placeholder="34600000000" style="flex:1;">
+                                <button onclick="loadProfile()" class="btn btn-ghost" style="padding: 0 15px; background: var(--surface2); border: 1px solid var(--border); color: var(--accent); border-radius: 10px; cursor: pointer;">
+                                    <i data-lucide="search" style="width: 16px;"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-field full">
+                            <label class="form-label">Datos / Base de Conocimiento</label>
+                            <textarea id="prof-kb" class="form-input form-textarea" style="height: 200px;" placeholder="Escribe aquí toda la información relevante de este cliente o su negocio (precios, servicios, historia, etc.)"></textarea>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                        <button class="save-btn" onclick="saveProfile()">GUARDAR INFORMACIÓN</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN HERRAMIENTAS -->
+            <div id="herramientas-view" style="display:none; flex-direction:column; gap:30px;">
+                <!-- LANDING DE HERRAMIENTAS -->
+                <div id="herr-landing">
+                    <div style="margin-bottom:40px;">
+                        <h2 class="l-title" style="font-size:42px; text-align:left; margin-bottom:10px;">Inventario de Obra</h2>
+                        <p class="l-desc" style="text-align:left; margin:0; font-size:16px; color:var(--text2);">Control total sobre tu maquinaria y suministros en tiempo real.</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                        <div class="l-card" onclick="showHerrUpload()" style="cursor:pointer; padding: 24px;">
+                            <i data-lucide="camera" class="l-card-icon" style="width: 32px; height: 32px; color:var(--accent);"></i>
+                            <h3>Procesar Imagen</h3>
+                            <p style="font-size: 14px;">Sube una foto y deja que nuestra IA extraiga marca, modelo y categoría automáticamente.</p>
+                        </div>
+                        <div class="l-card" onclick="showHerrList()" style="cursor:pointer; padding: 24px;">
+                            <i data-lucide="list" class="l-card-icon" style="width: 32px; height: 32px; color:var(--accent2);"></i>
+                            <h3>Inventario Histórico</h3>
+                            <p style="font-size: 14px;">Consulta el estado de cada herramienta registrada.</p>
+                        </div>
+                        <div class="l-card" onclick="showHerrBudget()" style="cursor:pointer; padding: 24px;">
+                            <i data-lucide="upload-cloud" class="l-card-icon" style="width: 32px; height: 32px; color:var(--accent3);"></i>
+                            <h3>Presupuestos de Obra</h3>
+                            <p style="font-size: 14px;">Cruza tu presupuesto CSV con los materiales pedidos por WhatsApp.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÁREA CARGA IMAGEN -->
+                <div id="herr-upload-area" style="display:none;">
+                    <div class="config-card">
+                        <div style="display:flex; justify-content:flex-end; margin-bottom:24px;">
+                            <button onclick="showHerrLanding()" class="nav-item" style="width:auto; padding:4px 12px; display: flex; align-items: center; gap: 8px;"><i data-lucide="arrow-left" style="width:16px;"></i> Volver</button>
+                        </div>
+                        <div id="drop-zone" style="height:300px; border:2px dashed var(--border2); border-radius:24px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:rgba(255,255,255,0.01); transition:0.3s; cursor:pointer;">
+                            <i data-lucide="upload-cloud" style="width:48px; height:48px; color:var(--text3);"></i>
+                            <p style="font-weight:700; font-size:18px;">Suelta la foto aquí</p>
+                            <input type="file" id="herr-file" style="display:none;" accept="image/*">
+                        </div>
+                        <div id="herr-result" style="display:none; margin-top:24px; padding:24px; background:var(--surface2); border-radius:20px; border:1px solid var(--border);">
+                            <h4 style="color:var(--accent); margin-bottom:16px; font-size:14px; text-transform:uppercase;">Resultado del Análisis IA</h4>
+                            <div id="herr-data" class="form-grid"></div>
+                            <button class="save-btn" style="margin-top:20px; width:100%;" onclick="confirmHerrStorage()">GUARDAR EN INVENTARIO</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÁREA LISTADO -->
+                <div id="herr-list-area" style="display:none;">
+                    <div class="config-card">
+                        <div style="display:flex; justify-content:flex-end; margin-bottom:24px;">
+                            <button onclick="showHerrLanding()" class="nav-item" style="width:auto; padding:4px 12px; display: flex; align-items: center; gap: 8px;"><i data-lucide="arrow-left" style="width:16px;"></i> Volver</button>
+                        </div>
+                        <div id="herr-list-container" style="display:flex; flex-direction:column; gap:20px; max-height: 550px; overflow-y: auto; padding: 20px; margin: -20px;"></div>
+                    </div>
+                </div>
+
+                <!-- ÁREA DETALLE -->
+                <div id="herr-detail-area" style="display:none;">
+                    <div class="config-card">
+                        <div style="display:flex; justify-content:flex-end; margin-bottom:24px;">
+                            <button onclick="showHerrList()" class="nav-item" style="width:auto; padding:4px 12px; display: flex; align-items: center; gap: 8px;"><i data-lucide="arrow-left" style="width:16px;"></i> Volver</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 300px 1fr; gap:30px;">
+                            <img id="detail-img" src="" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:24px; border:1px solid var(--border);">
+                            <div class="form-grid">
+                                <div class="form-field"><label class="form-label">Nombre</label><div id="detail-name" class="form-input" style="background:var(--surface2);"></div></div>
+                                <div class="form-field"><label class="form-label">Marca</label><div id="detail-brand" class="form-input" style="background:var(--surface2);"></div></div>
+                                <div class="form-field"><label class="form-label">Modelo</label><div id="detail-model" class="form-input" style="background:var(--surface2);"></div></div>
+                                <div class="form-field"><label class="form-label">Color</label><div id="detail-color" class="form-input" style="background:var(--surface2);"></div></div>
+                                <div class="form-field"><label class="form-label">Categoría</label><div id="detail-category" class="form-input" style="background:var(--surface2);"></div></div>
+                                <div class="form-field"><label class="form-label">Fecha Registro</label><div id="detail-date" class="form-input" style="background:var(--surface2);"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÁREA PRESUPUESTO -->
+                <div id="herr-budget-area" style="display:none;">
+                    <div class="config-card">
+                        <div style="display:flex; justify-content:flex-end; margin-bottom:24px;">
+                            <button id="btn-budget-back" onclick="showHerrLanding()" class="nav-item" style="width:auto; padding:4px 12px; display: flex; align-items: center; gap: 8px;"><i data-lucide="arrow-left" style="width:16px;"></i> Volver</button>
+                        </div>
+
+                        <!-- VISTA 1: SELECCIÓN DE OBRA (TARJETAS) -->
+                        <div id="budget-selection-view">
+                            <div id="budget-groups-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:25px; padding: 20px; margin: -20px;">
+                                <!-- Las tarjetas se cargarán dinámicamente -->
+                            </div>
+                        </div>
+
+                        <!-- VISTA 2: GESTIÓN DE OBRA SELECCIONADA -->
+                        <div id="budget-manage-view" style="display:none;">
+                            <div id="requests-scan-area" style="margin-bottom:30px; padding:20px; background:rgba(0,229,255,0.03); border-radius:16px; border:1px solid rgba(0,229,255,0.1);">
+                                <div style="display:flex; align-items:center; gap:10px; margin-bottom:16px;">
+                                    <i data-lucide="message-square" style="color:var(--accent); width:18px;"></i>
+                                    <h4 style="font-size:14px; font-weight:600; color:var(--text);">Pedidos Actuales en Chat</h4>
+                                </div>
+                                <div id="group-requests-container" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+                            </div>
+
+                            <div id="budget-drop-zone" style="height:180px; border:2px dashed var(--border2); border-radius:24px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:rgba(255,255,255,0.01); transition:0.3s; cursor:pointer;">
+                                <i data-lucide="upload-cloud" style="width:40px; height:40px; color:var(--text3);"></i>
+                                <div style="text-align:center;">
+                                    <p style="font-weight:700; font-size:16px; color:var(--text);">Comparar con Presupuesto CSV</p>
+                                    <p style="font-size:12px; color:var(--text2);">Suelta aquí el archivo de planificación</p>
+                                </div>
+                                <input type="file" id="budget-file" style="display:none;" accept=".csv">
+                            </div>
+
+                            <div id="budget-result" style="display:none; margin-top:30px;">
+                                <!-- ROW 1: HEALTH & SUMMARY -->
+                                <div style="display:grid; grid-template-columns: 350px 1fr; gap:24px; margin-bottom:30px;">
+                                    <div style="background:var(--surface2); padding:30px; border-radius:24px; border:1px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+                                        <div style="position:relative; width:150px; height:150px; display:flex; align-items:center; justify-content:center;">
+                                            <svg width="150" height="150" viewBox="0 0 100 100">
+                                                <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border)" stroke-width="8"></circle>
+                                                <circle id="health-circle" cx="50" cy="50" r="45" fill="none" stroke="var(--accent)" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="0" stroke-linecap="round" style="transition:1s ease-out; transform: rotate(-90deg); transform-origin: 50% 50%;"></circle>
+                                            </svg>
+                                            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);">
+                                                <h2 id="health-pct" style="font-size:36px; margin:0;">0%</h2>
+                                                <span style="font-size:10px; color:var(--text3); text-transform:uppercase;">Salud Obra</span>
+                                            </div>
+                                        </div>
+                                        <div id="health-label" style="margin-top:20px; font-weight:700; color:var(--accent);">OPTIMIZADO</div>
+                                    </div>
+
+                                    <div style="display:grid; grid-template-rows: repeat(2, 1fr); gap:20px;">
+                                        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
+                                            <div style="background:rgba(255,255,255,0.02); padding:20px; border-radius:16px; border:1px solid var(--border);">
+                                                <span style="font-size:11px; color:var(--text2);">PRESUPUESTO TOTAL</span>
+                                                <h4 id="sum-total" style="font-size:24px; color:var(--text); margin-top:5px;">0 €</h4>
+                                            </div>
+                                            <div style="background:rgba(255,255,255,0.02); padding:20px; border-radius:16px; border:1px solid var(--border);">
+                                                <span style="font-size:11px; color:var(--text2);">SOLICITADO HOY</span>
+                                                <h4 id="sum-spent" style="font-size:24px; color:var(--accent); margin-top:5px;">0 €</h4>
+                                            </div>
+                                            <div style="background:rgba(255,255,255,0.02); padding:20px; border-radius:16px; border:1px solid var(--border);">
+                                                <span style="font-size:11px; color:var(--text2);">REMANENTE</span>
+                                                <h4 id="sum-remain" style="font-size:24px; color:var(--success); margin-top:5px;">0 €</h4>
+                                            </div>
+                                        </div>
+                                        <div id="ai-insights-box" style="background:linear-gradient(90deg, rgba(0,229,255,0.07) 0%, transparent 100%); padding:20px; border-radius:16px; border:1px solid rgba(0,229,255,0.1); display:flex; flex-direction:column; gap:8px;">
+                                            <h5 style="font-size:12px; color:var(--accent); text-transform:uppercase; display:flex; align-items:center; gap:8px;"><i data-lucide="zap" style="width:14px;"></i> AI Audit Insights</h5>
+                                            <div id="insights-list" style="font-size:13px; color:var(--text2); line-height:1.5;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- ROW 2: RISKS -->
+                                <div id="risk-ranking-area" style="margin-bottom:30px;">
+                                    <h4 style="font-size:14px; margin-bottom:16px; color:var(--danger); display:flex; align-items:center; gap:8px;"><i data-lucide="alert-triangle" style="width:16px;"></i> ALERTAS CRÍTICAS DE DESVIACIÓN</h4>
+                                    <div id="risk-list" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;"></div>
+                                </div>
+
+                                <!-- ROW 3: DETALLE TABLA -->
+                                <div style="background:var(--surface2); border:1px solid var(--border); border-radius:24px; overflow:hidden;">
+                                    <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
+                                        <thead>
+                                            <tr id="budget-table-headers"></tr>
+                                        </thead>
+                                        <tbody id="budget-audit-table-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        function closeIntro() {
+            document.getElementById('intro-overlay').classList.add('hidden');
+            localStorage.setItem('looply-intro-v2-seen', 'true');
+        }
+
+        // Mostrar intro si no se ha visto en esta sesión o dispositivo
+        if (localStorage.getItem('looply-intro-v2-seen') === 'true') {
+            document.getElementById('intro-overlay').style.display = 'none';
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        function showView(view) {
+            const chatView = document.getElementById('chat-view');
+            const configView = document.getElementById('config-view');
+            const profilesView = document.getElementById('profiles-view');
+            const herramientasView = document.getElementById('herramientas-view');
+            
+            const navChat = document.getElementById('nav-chat');
+            const navConfig = document.getElementById('nav-config');
+            const navProfiles = document.getElementById('nav-profiles');
+            const navHerramientas = document.getElementById('nav-herramientas');
+            
+            const viewTitle = document.getElementById('view-title');
+            const viewSub = document.getElementById('view-subtitle');
+
+            chatView.style.display = 'none';
+            configView.style.display = 'none';
+            profilesView.style.display = 'none';
+            herramientasView.style.display = 'none';
+            
+            navChat.classList.remove('active');
+            navConfig.classList.remove('active');
+            navProfiles.classList.remove('active');
+            if(navHerramientas) navHerramientas.classList.remove('active');
+
+            if (view === 'chat') {
+                chatView.style.display = 'flex';
+                navChat.classList.add('active');
+                viewTitle.innerText = 'Chat de Prueba';
+                viewSub.innerText = 'Interactúa directamente con tu motor IA';
+            } else if (view === 'profiles') {
+                profilesView.style.display = 'block';
+                navProfiles.classList.add('active');
+                viewTitle.innerText = 'Perfiles de Clientes';
+                viewSub.innerText = 'Personaliza el conocimiento para cada contacto';
+            } else if (view === 'herramientas') {
+                herramientasView.style.display = 'flex';
+                if(navHerramientas) navHerramientas.classList.add('active');
+                viewTitle.innerText = 'Gestión de Herramientas';
+                viewSub.innerText = 'Control de inventario y presupuestos de obra';
+            } else {
+                configView.style.display = 'block';
+                navConfig.classList.add('active');
+                viewTitle.innerText = 'Configuración';
+                viewSub.innerText = 'Administra tus llaves y parámetros técnicos';
+                loadUserConfig();
+            }
+            if(window.lucide) lucide.createIcons();
+        }
+
+        async function loadProfile() {
+            const phone = document.getElementById('prof-phone').value;
+            if (!phone) {
+                alert("Introduce un número de teléfono.");
+                return;
+            }
+            try {
+                const res = await fetch(`/api/get-knowledge?phone_number=${phone}`);
+                const json = await res.json();
+                if (json.success && json.data) {
+                    document.getElementById('prof-kb').value = json.data.knowledge_base || '';
+                } else {
+                    document.getElementById('prof-kb').value = '';
+                    alert("No se encontró perfil previo para este número. Listo para crear.");
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function saveProfile() {
+            const phone = document.getElementById('prof-phone').value;
+            const kb = document.getElementById('prof-kb').value;
+            if (!phone) {
+                alert("El teléfono es obligatorio."); return;
+            }
+            try {
+                const res = await fetch('/api/save-knowledge', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone_number: phone, knowledge_base: kb })
+                });
+                const json = await res.json();
+                if (json.success) {
+                    alert("Base de conocimiento guardada correctamente.");
+                } else {
+                    alert("Error: " + (json.error || "Desconocido"));
+                }
+            } catch (e) {
+                alert("Error de conexión al guardar.");
+            }
+        }
+
+        async function fetchBotStatus() {
+            const toggle = document.getElementById('bot-toggle');
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            const sidebarText = document.getElementById('sidebar-bot-text');
+
+            try {
+                const response = await fetch('/api/bot-status?t=' + Date.now());
+                const data = await response.json();
+
+                let isActive = false;
+                if (data.active !== undefined) {
+                    isActive = (data.active === true || data.active === 1 || data.active === "1" || data.active === "true");
+                }
+
+                if (isActive) {
+                    toggle.checked = true;
+                    statusDot.className = 'active';
+                    statusText.innerText = 'Motores Listos';
+                    statusText.style.color = 'var(--success)';
+                    sidebarText.innerText = 'Bot Activo';
+                } else {
+                    toggle.checked = false;
+                    statusDot.className = 'inactive';
+                    statusText.innerText = 'Bot Pausado';
+                    statusText.style.color = 'var(--danger)';
+                    sidebarText.innerText = 'Bot Pausado';
+                }
+            } catch (e) {
+                console.error("Fallo al cargar estado:", e);
+            }
+        }
+
+        async function toggleBot() {
+            const toggle = document.getElementById('bot-toggle');
+            try {
+                const response = await fetch('/api/bot-toggle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ active: toggle.checked })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    fetchBotStatus();
+                }
+            } catch (e) {
+                alert("Error al cambiar estado.");
+            }
+        }
+
+        async function loadUserConfig() {
+            try {
+                const res = await fetch('/api/user-config');
+                const json = await res.json();
+                if (json.success) {
+                    document.getElementById('cfg-gemini').value = json.data.gemini_api_key || '';
+                    document.getElementById('cfg-openai').value = json.data.openai_api_key || '';
+                    document.getElementById('cfg-ai-provider').value = json.data.ai_provider || 'gemini';
+                    document.getElementById('cfg-wasender').value = json.data.wasender_token || '';
+                    document.getElementById('cfg-prompt').value = json.data.bot_prompt || '';
+                }
+
+                const envRes = await fetch('/api/env-config');
+                const envJson = await envRes.json();
+                if (envJson.success) {
+                    document.getElementById('cfg-supabase-url').value = envJson.data.supabase_url || '';
+                    document.getElementById('cfg-supabase-key').value = envJson.data.supabase_key || '';
+                }
+            } catch (e) { console.error("Error config:", e); }
+        }
+
+        async function saveUserConfig() {
+            const userData = {
+                gemini_api_key: document.getElementById('cfg-gemini').value,
+                openai_api_key: document.getElementById('cfg-openai').value,
+                ai_provider: document.getElementById('cfg-ai-provider').value,
+                wasender_token: document.getElementById('cfg-wasender').value,
+                bot_prompt: document.getElementById('cfg-prompt').value
+            };
+            const envData = {
+                supabase_url: document.getElementById('cfg-supabase-url').value,
+                supabase_key: document.getElementById('cfg-supabase-key').value
+            };
+
+            try {
+                const resUser = await fetch('/api/user-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                const resEnv = await fetch('/api/env-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(envData)
+                });
+
+                const r1 = await resUser.json();
+                const r2 = await resEnv.json();
+
+                if (r1.success && r2.success) {
+                    alert('✅ Configuración guardada correctamente');
+                } else {
+                    alert('⚠️ Error parcial al guardar');
+                }
+            } catch (e) { alert("Error al guardar."); }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const chat = document.getElementById('chat');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            chat.innerHTML += `<div class="message user-msg">${msg}</div>`;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            const loadingId = 'loading-' + Date.now();
+            chat.innerHTML += `<div class="message ai-msg" id="${loadingId}">...</div>`;
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+                const data = await response.json();
+                document.getElementById(loadingId).innerText = data.reply || "Sin respuesta.";
+            } catch (error) {
+                document.getElementById(loadingId).innerText = "Error al conectar.";
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function copyWebhook() {
+            const input = document.getElementById('cfg-webhook');
+            input.select();
+            document.execCommand('copy');
+            alert('¡Webhook copiado!');
+        }
+
+        // --- LÓGICA HERRAMIENTAS ---
+        function showHerrUpload() {
+            hideAllHerrSubviews();
+            document.getElementById('herr-upload-area').style.display = 'block';
+            document.getElementById('view-title').innerText = 'Analizador IA';
+            initDropZone();
+        }
+        function hideHerrUpload() { showHerrLanding(); }
+        function showHerrLanding() {
+            hideAllHerrSubviews();
+            document.getElementById('herr-landing').style.display = 'block';
+            document.getElementById('view-title').innerText = 'Gestión de Herramientas';
+        }
+
+        function hideAllHerrSubviews() {
+            document.getElementById('herr-landing').style.display = 'none';
+            document.getElementById('herr-upload-area').style.display = 'none';
+            document.getElementById('herr-list-area').style.display = 'none';
+            document.getElementById('herr-detail-area').style.display = 'none';
+            document.getElementById('herr-budget-area').style.display = 'none';
+        }
+
+        function hideBudgetResult() {
+            document.getElementById('budget-result').style.display = 'none';
+            document.getElementById('budget-groups-grid').style.display = 'grid';
+            const dz = document.getElementById('budget-drop-zone');
+            dz.style.display = 'flex';
+            dz.style.opacity = '1';
+            dz.innerHTML = '<i data-lucide="upload-cloud" style="width:40px; height:40px; color:var(--text3);"></i><div style="text-align:center;"><p style="font-weight:700; font-size:16px; color:var(--text);">Comparar con Presupuesto CSV</p><p style="font-size:12px; color:var(--text2);">Suelta aquí el archivo de planificación</p></div><input type="file" id="budget-file" style="display:none;" accept=".csv">';
+            lucide.createIcons();
+        }
+
+        async function showHerrBudget() {
+            hideAllHerrSubviews();
+            document.getElementById('herr-budget-area').style.display = 'block';
+            document.getElementById('budget-selection-view').style.display = 'block';
+            document.getElementById('budget-manage-view').style.display = 'none';
+            document.getElementById('btn-budget-back').onclick = showHerrLanding;
+            const grid = document.getElementById('budget-groups-grid');
+            grid.innerHTML = '<p>Cargando grupos...</p>';
+            try {
+                const res = await fetch('/api/groups/list');
+                const json = await res.json();
+                if (json.success) {
+                    grid.innerHTML = json.data.map(g => `
+                        <div onclick="selectBudgetGroup('${g.id}', '${g.name}')" class="l-card" style="margin:0; cursor:pointer; padding:20px;">
+                            <h4 style="font-size:16px; margin-bottom:8px;">${g.name || 'Sin nombre'}</h4>
+                            <p style="font-size:12px; color:var(--text2);">${g.id.substring(0,10)}...</p>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) { grid.innerHTML = '<p>Error al cargar.</p>'; }
+        }
+
+        let currentWid = null;
+        async function selectBudgetGroup(wid, name) {
+            currentWid = wid;
+            document.getElementById('budget-selection-view').style.display = 'none';
+            document.getElementById('budget-manage-view').style.display = 'block';
+            document.getElementById('view-title').innerText = 'Obra: ' + name;
+            document.getElementById('btn-budget-back').onclick = hideBudgetResult;
+            loadGroupRequests(wid);
+            initBudgetDropZone();
+        }
+
+        async function loadGroupRequests(wid) {
+            const container = document.getElementById('group-requests-container');
+            container.innerHTML = '<p style="font-size:12px;">Escaneando pedidos...</p>';
+            try {
+                const res = await fetch(`/api/groups/requests?group_id=${wid}`);
+                const json = await res.json();
+                if (json.success) {
+                    if(json.data.length === 0) container.innerHTML = '<p style="font-size:12px; color:var(--text3);">Sin pedidos detectados.</p>';
+                    else container.innerHTML = json.data.map(r => `<div style="background:rgba(0,229,255,0.1); border:1px solid var(--accent); padding:4px 10px; border-radius:8px; font-size:11px;"><b>${r.item}</b>: ${r.qty}</div>`).join('');
+                }
+            } catch (e) {}
+        }
+
+        function initBudgetDropZone() {
+            const dz = document.getElementById('budget-drop-zone');
+            const fileInput = document.getElementById('budget-file');
+            dz.onclick = () => fileInput.click();
+            dz.onchange = (e) => analyzeBudget(e.target.files[0]);
+            fileInput.onchange = (e) => analyzeBudget(e.target.files[0]);
+        }
+
+        async function analyzeBudget(file) {
+            if(!file || !currentWid) return;
+            const dz = document.getElementById('budget-drop-zone');
+            dz.innerHTML = '<p>Analizando...</p>';
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('whatsapp_id', currentWid);
+            try {
+                const res = await fetch('/api/budgets/compare', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(data.success) {
+                    const b = data.data;
+                    document.getElementById('budget-result').style.display = 'block';
+                    document.getElementById('sum-total').innerText = b.summary.total_budget.toLocaleString() + ' €';
+                    document.getElementById('sum-spent').innerText = b.summary.estimated_spent.toLocaleString() + ' €';
+                    document.getElementById('sum-remain').innerText = (b.summary.total_budget - b.summary.estimated_spent).toLocaleString() + ' €';
+                    document.getElementById('health-pct').innerText = Math.round(100 - (b.summary.estimated_spent / b.summary.total_budget * 100)) + '%';
+                    document.getElementById('insights-list').innerHTML = b.ai_insights.map(i => `• ${i}`).join('<br>');
+                    document.getElementById('risk-list').innerHTML = b.top_risks.map(r => `<div style="background:rgba(255,0,0,0.05); padding:12px; border-radius:10px; font-size:12px;"><b>${r.item}</b><br>${r.reason}</div>`).join('');
+                    dz.style.display = 'none';
+                }
+            } catch (e) { alert("Error"); }
+        }
+
+        async function showHerrList() {
+            hideAllHerrSubviews();
+            document.getElementById('herr-list-area').style.display = 'block';
+            const container = document.getElementById('herr-list-container');
+            container.innerHTML = '<p>Cargando inventario...</p>';
+            try {
+                const res = await fetch('/api/tools/list');
+                const json = await res.json();
+                if (json.success) {
+                    container.innerHTML = json.data.map(item => `
+                        <div class="l-card" style="padding:16px; display:flex; gap:16px; align-items:center; cursor:pointer;" onclick='showHerrDetail(${JSON.stringify(item)})'>
+                            <img src="${item.image_url || '/imagen/logo.jpg'}" style="width:60px; height:60px; object-fit:cover; border-radius:12px; border:1px solid var(--border);">
+                            <div style="flex:1;">
+                                <h4 style="margin:0; font-size:16px;">${item.name}</h4>
+                                <p style="font-size:12px; color:var(--text2); margin:4px 0 0 0;">${item.brand} | ${item.model}</p>
+                            </div>
+                            <span style="font-size:11px; background:rgba(0,229,255,0.1); color:var(--accent); padding:4px 10px; border-radius:12px; font-weight:600;">${item.category}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (e) {}
+        }
+
+        function showHerrDetail(item) {
+            hideAllHerrSubviews();
+            document.getElementById('herr-detail-area').style.display = 'block';
+            document.getElementById('detail-img').src = item.image_url || '/imagen/logo.jpg';
+            document.getElementById('detail-name').innerText = item.name;
+            document.getElementById('detail-brand').innerText = item.brand;
+            document.getElementById('detail-model').innerText = item.model;
+            document.getElementById('detail-color').innerText = item.color;
+            document.getElementById('detail-category').innerText = item.category;
+            document.getElementById('detail-date').innerText = new Date(item.created_at).toLocaleString();
+        }
+
+        let tempHerrData = null;
+        function initDropZone() {
+            const dz = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('herr-file');
+            dz.onclick = () => fileInput.click();
+            fileInput.onchange = (e) => analyzeImage(e.target.files[0]);
+        }
+
+        async function analyzeImage(file) {
+            if(!file) return;
+            const dz = document.getElementById('drop-zone');
+            dz.innerHTML = '<p>Analizando con Inteligencia Artificial...</p>';
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                const res = await fetch('/api/tools/analyze', { method: 'POST', body: formData });
+                const json = await res.json();
+                if(json.success) {
+                    tempHerrData = json.data;
+                    document.getElementById('herr-result').style.display = 'block';
+                    document.getElementById('herr-data').innerHTML = Object.entries(json.data).map(([k,v]) => `<div class="form-field"><label class="form-label">${k}</label><input class="form-input" value="${v}"></div>`).join('');
+                    dz.style.display = 'none';
+                }
+            } catch (e) { alert("Error"); }
+        }
+
+        async function confirmHerrStorage() {
+            const inputs = document.querySelectorAll('#herr-data input');
+            const data = {
+                name: inputs[0].value,
+                brand: inputs[1].value,
+                model: inputs[2].value,
+                color: inputs[3].value,
+                category: inputs[4].value,
+                image_url: tempHerrData.image_url
+            };
+            await fetch('/api/tools/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            alert('Guardado.');
+            showHerrLanding();
+        }
+
+        fetchBotStatus();
+    </script>
+</body>
+
+</html>

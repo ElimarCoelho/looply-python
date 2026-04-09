@@ -1,0 +1,98 @@
+# 🔐 VARIABLES DE ENTORNO (SECRETOS)
+.env
+.env.local
+.env.*.local
+
+# 🐍 PYTHON
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 🛠️ VIRTUAL ENVIRONMENTS
+venv/
+ENV/
+env/
+.venv
+
+# 📝 IDE Y EDITORES
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+.sublime-project
+.sublime-workspace
+
+# 🧪 TESTING Y COVERAGE
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# 📦 DEPENDENCIAS (node_modules si hubiera frontend separado)
+node_modules/
+package-lock.json
+
+# 🔒 ARCHIVOS SENSIBLES
+*.pem
+*.key
+*.p8
+credentials.json
+service-account-key.json
+
+# 🗂️ ARCHIVOS COMPILADOS
+*.pyc
+*.pyo
+*.o
+*.so
+
+# 📊 LOGS
+*.log
+logs/
+debug.log
+
+# 🏠 Sistema
+.DS_Store
+Thumbs.db
+
+# ⚡ VARIOS
+.tmp/
+temp/
+*.tmp
+.env.swp
+
+# 📦 ARCHIVOS ESPECIFICOS DE LOOPLY
+*.rar
+*.zip
+*.db
+*.ctl

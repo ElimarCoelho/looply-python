@@ -1,0 +1,9 @@
+put app.py /root/looply-python/app.py
+put app_pedidos.py /root/looply-python/app_pedidos.py
+put .env /root/looply-python/.env
+put dashboard_new.html /root/looply-python/dashboard_new.html
+put pedidos.html /root/looply-python/pedidos.html
+put wsgi.py /root/looply-python/wsgi.py
+mkdir /root/looply-python/imagen
+put imagen/logo.jpg /root/looply-python/imagen/logo.jpg
+quit
